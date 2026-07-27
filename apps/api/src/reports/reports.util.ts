@@ -155,18 +155,19 @@ export function computeOccupancyMetrics(
 /** Minimal CSV serializer — values are stringified and quoted only when
  * they contain a comma/quote/newline, no dependency needed for the
  * report-shaped, all-scalar rows this codebase ever exports. */
-export function toCsv<
-  T extends Record<string, string | number | boolean | null | undefined>,
->(columns: { key: keyof T & string; label: string }[], rows: T[]): string {
-  const escape = (
-    value: string | number | boolean | null | undefined,
-  ): string => {
-    const str = value === null || value === undefined ? '' : String(value);
+export function toCsv<T extends object>(
+  columns: { key: keyof T & string; label: string }[],
+  rows: T[],
+): string {
+  const escape = (value: unknown): string => {
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') return JSON.stringify(value);
+    const str = `${value as string | number | boolean}`;
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
   const header = columns.map((c) => escape(c.label)).join(',');
   const lines = rows.map((row) =>
-    columns.map((c) => escape(row[c.key])).join(','),
+    columns.map((c) => escape(row[c.key] as unknown)).join(','),
   );
   return [header, ...lines].join('\n');
 }
