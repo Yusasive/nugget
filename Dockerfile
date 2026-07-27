@@ -25,4 +25,4 @@ COPY --from=base /app/apps/api/prisma.config.ts ./prisma.config.ts
 COPY --from=base /app/packages/shared-types/dist ./node_modules/@nugget/shared-types/dist
 
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node dist/main"]
