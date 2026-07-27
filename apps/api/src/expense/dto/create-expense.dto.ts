@@ -1,4 +1,10 @@
-import { IsDateString, IsDecimal, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsDecimal,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import type { CreateExpenseRequestBody } from '@nugget/shared-types';
 
 export class CreateExpenseDto implements CreateExpenseRequestBody {

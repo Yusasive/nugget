@@ -179,8 +179,7 @@ export class RestaurantOrderService {
         });
         if (
           !booking ||
-          (actor.role !== 'SUPER_ADMIN' &&
-            booking.branchId !== actor.branchId)
+          (actor.role !== 'SUPER_ADMIN' && booking.branchId !== actor.branchId)
         ) {
           throw new NotFoundException('Room booking not found');
         }
@@ -299,7 +298,9 @@ export class RestaurantOrderService {
       );
     }
     if (order.items.length === 0) {
-      throw new BadRequestException('Cannot send an empty order to the kitchen');
+      throw new BadRequestException(
+        'Cannot send an empty order to the kitchen',
+      );
     }
 
     return this.prisma.$transaction(async (tx) => {

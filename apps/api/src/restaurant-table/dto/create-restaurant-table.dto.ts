@@ -1,9 +1,7 @@
 import { IsInt, IsString, IsUUID, Min, MinLength } from 'class-validator';
 import type { CreateRestaurantTableRequestBody } from '@nugget/shared-types';
 
-export class CreateRestaurantTableDto
-  implements CreateRestaurantTableRequestBody
-{
+export class CreateRestaurantTableDto implements CreateRestaurantTableRequestBody {
   @IsUUID()
   branchId: string;
 

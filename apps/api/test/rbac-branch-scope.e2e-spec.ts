@@ -35,7 +35,14 @@ describe('RBAC & branch scoping (e2e)', () => {
       imports: [AppModule],
     })
       .overrideProvider(ThrottlerStorage)
-      .useValue({ increment: () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
+      .useValue({
+        increment: () => ({
+          totalHits: 1,
+          timeToExpire: 0,
+          isBlocked: false,
+          timeToBlockExpire: 0,
+        }),
+      })
       .compile();
 
     app = moduleFixture.createNestApplication();
@@ -322,7 +329,9 @@ describe('RBAC & branch scoping (e2e)', () => {
         .get('/api/v1/roles')
         .set('Authorization', `Bearer ${superAdminToken}`)
         .expect(200);
-      const role = (rolesRes.body as RoleDto[]).find((r) => r.name === roleName);
+      const role = (rolesRes.body as RoleDto[]).find(
+        (r) => r.name === roleName,
+      );
       if (!role) throw new Error(`${roleName} role missing from seed data`);
 
       const email = `${label}-${randomUUID().slice(0, 8)}@test.local`;
@@ -356,7 +365,11 @@ describe('RBAC & branch scoping (e2e)', () => {
         branchBId,
         'coordinator-b',
       );
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'front-desk');
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'front-desk',
+      );
       housekeepingToken = await createStaffAndLogin(
         'HOUSEKEEPING',
         branchAId,
@@ -377,54 +390,73 @@ describe('RBAC & branch scoping (e2e)', () => {
     });
 
     describe('roles with no access to the Tours & Packages module', () => {
-      const deniedTokens = () => [
-        ['FRONT_DESK', () => frontDeskToken],
-        ['HOUSEKEEPING', () => housekeepingToken],
-        ['RESTAURANT_STAFF', () => restaurantStaffToken],
-      ] as const;
+      const deniedTokens = () =>
+        [
+          ['FRONT_DESK', () => frontDeskToken],
+          ['HOUSEKEEPING', () => housekeepingToken],
+          ['RESTAURANT_STAFF', () => restaurantStaffToken],
+        ] as const;
 
-      it.each(deniedTokens())('%s gets 403 listing tour guides', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .get('/api/v1/tour-guides')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 listing tour guides',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .get('/api/v1/tour-guides')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .expect(403);
+        },
+      );
 
-      it.each(deniedTokens())('%s gets 403 listing vehicles', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .get('/api/v1/vehicles')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 listing vehicles',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .get('/api/v1/vehicles')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .expect(403);
+        },
+      );
 
-      it.each(deniedTokens())('%s gets 403 listing tour packages', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .get('/api/v1/tour-packages')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 listing tour packages',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .get('/api/v1/tour-packages')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .expect(403);
+        },
+      );
 
-      it.each(deniedTokens())('%s gets 403 listing tour departures', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .get('/api/v1/tour-departures')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 listing tour departures',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .get('/api/v1/tour-departures')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .expect(403);
+        },
+      );
 
-      it.each(deniedTokens())('%s gets 403 listing tour bookings', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .get('/api/v1/tour-bookings')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 listing tour bookings',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .get('/api/v1/tour-bookings')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .expect(403);
+        },
+      );
 
-      it.each(deniedTokens())('%s gets 403 creating a tour guide', async (_role, getToken) => {
-        await request(app.getHttpServer())
-          .post('/api/v1/tour-guides')
-          .set('Authorization', `Bearer ${getToken()}`)
-          .send({ branchId: branchAId, fullName: 'Should Not Be Created' })
-          .expect(403);
-      });
+      it.each(deniedTokens())(
+        '%s gets 403 creating a tour guide',
+        async (_role, getToken) => {
+          await request(app.getHttpServer())
+            .post('/api/v1/tour-guides')
+            .set('Authorization', `Bearer ${getToken()}`)
+            .send({ branchId: branchAId, fullName: 'Should Not Be Created' })
+            .expect(403);
+        },
+      );
     });
 
     describe('branch scoping on Tours & Packages models', () => {
@@ -483,52 +515,86 @@ describe('RBAC & branch scoping (e2e)', () => {
     let coordinatorToken: string;
 
     beforeAll(async () => {
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-m7', app, superAdminToken);
-      housekeepingToken = await createStaffAndLogin('HOUSEKEEPING', branchAId, 'hk-m7', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-m7', app, superAdminToken);
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-m7',
+        app,
+        superAdminToken,
+      );
+      housekeepingToken = await createStaffAndLogin(
+        'HOUSEKEEPING',
+        branchAId,
+        'hk-m7',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-m7',
+        app,
+        superAdminToken,
+      );
     });
 
-    const deniedTokens = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const deniedTokens = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    it.each(deniedTokens())('%s gets 403 listing menu categories', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/menu-categories')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing menu categories',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/menu-categories')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 listing menu items', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/menu-items')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing menu items',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/menu-items')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 listing restaurant tables', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/restaurant-tables')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing restaurant tables',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/restaurant-tables')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 listing restaurant orders', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/restaurant-orders')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing restaurant orders',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/restaurant-orders')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 creating a restaurant order', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .post('/api/v1/restaurant-orders')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .send({ orderType: 'DINE_IN', items: [] })
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 creating a restaurant order',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .post('/api/v1/restaurant-orders')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .send({ orderType: 'DINE_IN', items: [] })
+          .expect(403);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -541,45 +607,76 @@ describe('RBAC & branch scoping (e2e)', () => {
     let coordinatorToken: string;
 
     beforeAll(async () => {
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-m8', app, superAdminToken);
-      housekeepingToken = await createStaffAndLogin('HOUSEKEEPING', branchAId, 'hk-m8', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-m8', app, superAdminToken);
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-m8',
+        app,
+        superAdminToken,
+      );
+      housekeepingToken = await createStaffAndLogin(
+        'HOUSEKEEPING',
+        branchAId,
+        'hk-m8',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-m8',
+        app,
+        superAdminToken,
+      );
     });
 
-    const deniedTokens = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const deniedTokens = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    it.each(deniedTokens())('%s gets 403 listing inventory items', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/inventory-items')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing inventory items',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/inventory-items')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 listing suppliers', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/suppliers')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing suppliers',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/suppliers')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 listing purchase records', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/purchase-records')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing purchase records',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/purchase-records')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 creating a purchase record', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .post('/api/v1/purchase-records')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .send({ supplierId: randomUUID(), items: [] })
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 creating a purchase record',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .post('/api/v1/purchase-records')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .send({ supplierId: randomUUID(), items: [] })
+          .expect(403);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -594,44 +691,79 @@ describe('RBAC & branch scoping (e2e)', () => {
     let restaurantStaffToken: string;
 
     beforeAll(async () => {
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-m9', app, superAdminToken);
-      housekeepingToken = await createStaffAndLogin('HOUSEKEEPING', branchAId, 'hk-m9', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-m9', app, superAdminToken);
-      restaurantStaffToken = await createStaffAndLogin('RESTAURANT_STAFF', branchAId, 'rs-m9', app, superAdminToken);
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-m9',
+        app,
+        superAdminToken,
+      );
+      housekeepingToken = await createStaffAndLogin(
+        'HOUSEKEEPING',
+        branchAId,
+        'hk-m9',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-m9',
+        app,
+        superAdminToken,
+      );
+      restaurantStaffToken = await createStaffAndLogin(
+        'RESTAURANT_STAFF',
+        branchAId,
+        'rs-m9',
+        app,
+        superAdminToken,
+      );
     });
 
-    const listDeniedTokens = () => [
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const listDeniedTokens = () =>
+      [
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    const approveDeniedTokens = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-      ['RESTAURANT_STAFF', () => restaurantStaffToken],
-    ] as const;
+    const approveDeniedTokens = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+        ['RESTAURANT_STAFF', () => restaurantStaffToken],
+      ] as const;
 
-    it.each(listDeniedTokens())('%s gets 403 listing expenses', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/expenses')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(listDeniedTokens())(
+      '%s gets 403 listing expenses',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/expenses')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(approveDeniedTokens())('%s gets 403 approving an expense', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .patch(`/api/v1/expenses/${randomUUID()}/approve`)
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(approveDeniedTokens())(
+      '%s gets 403 approving an expense',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .patch(`/api/v1/expenses/${randomUUID()}/approve`)
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(approveDeniedTokens())('%s gets 403 rejecting an expense', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .patch(`/api/v1/expenses/${randomUUID()}/reject`)
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(approveDeniedTokens())(
+      '%s gets 403 rejecting an expense',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .patch(`/api/v1/expenses/${randomUUID()}/reject`)
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -647,65 +779,106 @@ describe('RBAC & branch scoping (e2e)', () => {
     let restaurantStaffToken: string;
 
     beforeAll(async () => {
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-m12', app, superAdminToken);
-      housekeepingToken = await createStaffAndLogin('HOUSEKEEPING', branchAId, 'hk-m12', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-m12', app, superAdminToken);
-      restaurantStaffToken = await createStaffAndLogin('RESTAURANT_STAFF', branchAId, 'rs-m12', app, superAdminToken);
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-m12',
+        app,
+        superAdminToken,
+      );
+      housekeepingToken = await createStaffAndLogin(
+        'HOUSEKEEPING',
+        branchAId,
+        'hk-m12',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-m12',
+        app,
+        superAdminToken,
+      );
+      restaurantStaffToken = await createStaffAndLogin(
+        'RESTAURANT_STAFF',
+        branchAId,
+        'rs-m12',
+        app,
+        superAdminToken,
+      );
     });
 
     // All four roles are denied occupancy, expenses, and P&L
-    const managementOnlyDenied = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-      ['RESTAURANT_STAFF', () => restaurantStaffToken],
-    ] as const;
+    const managementOnlyDenied = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+        ['RESTAURANT_STAFF', () => restaurantStaffToken],
+      ] as const;
 
     // Only FRONT_DESK, HOUSEKEEPING, TOURS_COORDINATOR denied for restaurant-sales/inventory
-    const restaurantReportDenied = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const restaurantReportDenied = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    it.each(managementOnlyDenied())('%s gets 403 on occupancy report', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/reports/occupancy')
-        .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(managementOnlyDenied())(
+      '%s gets 403 on occupancy report',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/reports/occupancy')
+          .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(managementOnlyDenied())('%s gets 403 on expense report', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/reports/expenses')
-        .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(managementOnlyDenied())(
+      '%s gets 403 on expense report',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/reports/expenses')
+          .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(managementOnlyDenied())('%s gets 403 on profit-and-loss report', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/reports/profit-and-loss')
-        .query({ month: '2025-01' })
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(managementOnlyDenied())(
+      '%s gets 403 on profit-and-loss report',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/reports/profit-and-loss')
+          .query({ month: '2025-01' })
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(restaurantReportDenied())('%s gets 403 on restaurant-sales report', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/reports/restaurant-sales')
-        .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(restaurantReportDenied())(
+      '%s gets 403 on restaurant-sales report',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/reports/restaurant-sales')
+          .query({ startDate: '2025-01-01', endDate: '2025-01-31' })
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(restaurantReportDenied())('%s gets 403 on inventory report', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/reports/inventory')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(restaurantReportDenied())(
+      '%s gets 403 on inventory report',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/reports/inventory')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -717,29 +890,48 @@ describe('RBAC & branch scoping (e2e)', () => {
     let coordinatorToken: string;
 
     beforeAll(async () => {
-      restaurantStaffToken = await createStaffAndLogin('RESTAURANT_STAFF', branchAId, 'rs-m10', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-m10', app, superAdminToken);
+      restaurantStaffToken = await createStaffAndLogin(
+        'RESTAURANT_STAFF',
+        branchAId,
+        'rs-m10',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-m10',
+        app,
+        superAdminToken,
+      );
     });
 
-    const deniedTokens = () => [
-      ['RESTAURANT_STAFF', () => restaurantStaffToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const deniedTokens = () =>
+      [
+        ['RESTAURANT_STAFF', () => restaurantStaffToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    it.each(deniedTokens())('%s gets 403 listing housekeeping tasks', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/housekeeping-tasks')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing housekeeping tasks',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/housekeeping-tasks')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
 
-    it.each(deniedTokens())('%s gets 403 creating a housekeeping task', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .post('/api/v1/housekeeping-tasks')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .send({ roomId: randomUUID(), description: 'Clean room' })
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 creating a housekeeping task',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .post('/api/v1/housekeeping-tasks')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .send({ roomId: randomUUID(), description: 'Clean room' })
+          .expect(403);
+      },
+    );
   });
 
   // ---------------------------------------------------------------------------
@@ -761,14 +953,20 @@ describe('RBAC & branch scoping (e2e)', () => {
         .query({ pageSize: 100 })
         .expect(200);
 
-      const staffIds = (res.body as PaginatedResponse<{ staffId: string }>).data.map(
-        (a) => a.staffId,
-      );
+      const staffIds = (
+        res.body as PaginatedResponse<{ staffId: string }>
+      ).data.map((a) => a.staffId);
       expect(staffIds).not.toContain(managerBId);
     });
 
     it('non-manager roles get 403 on the attendance list', async () => {
-      const frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-m11', app, superAdminToken);
+      const frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-m11',
+        app,
+        superAdminToken,
+      );
       await request(app.getHttpServer())
         .get('/api/v1/attendance')
         .set('Authorization', `Bearer ${frontDeskToken}`)
@@ -787,24 +985,52 @@ describe('RBAC & branch scoping (e2e)', () => {
     let coordinatorToken: string;
 
     beforeAll(async () => {
-      frontDeskToken = await createStaffAndLogin('FRONT_DESK', branchAId, 'fd-al', app, superAdminToken);
-      housekeepingToken = await createStaffAndLogin('HOUSEKEEPING', branchAId, 'hk-al', app, superAdminToken);
-      restaurantStaffToken = await createStaffAndLogin('RESTAURANT_STAFF', branchAId, 'rs-al', app, superAdminToken);
-      coordinatorToken = await createStaffAndLogin('TOURS_COORDINATOR', branchAId, 'tc-al', app, superAdminToken);
+      frontDeskToken = await createStaffAndLogin(
+        'FRONT_DESK',
+        branchAId,
+        'fd-al',
+        app,
+        superAdminToken,
+      );
+      housekeepingToken = await createStaffAndLogin(
+        'HOUSEKEEPING',
+        branchAId,
+        'hk-al',
+        app,
+        superAdminToken,
+      );
+      restaurantStaffToken = await createStaffAndLogin(
+        'RESTAURANT_STAFF',
+        branchAId,
+        'rs-al',
+        app,
+        superAdminToken,
+      );
+      coordinatorToken = await createStaffAndLogin(
+        'TOURS_COORDINATOR',
+        branchAId,
+        'tc-al',
+        app,
+        superAdminToken,
+      );
     });
 
-    const deniedTokens = () => [
-      ['FRONT_DESK', () => frontDeskToken],
-      ['HOUSEKEEPING', () => housekeepingToken],
-      ['RESTAURANT_STAFF', () => restaurantStaffToken],
-      ['TOURS_COORDINATOR', () => coordinatorToken],
-    ] as const;
+    const deniedTokens = () =>
+      [
+        ['FRONT_DESK', () => frontDeskToken],
+        ['HOUSEKEEPING', () => housekeepingToken],
+        ['RESTAURANT_STAFF', () => restaurantStaffToken],
+        ['TOURS_COORDINATOR', () => coordinatorToken],
+      ] as const;
 
-    it.each(deniedTokens())('%s gets 403 listing audit log entries', async (_role, getToken) => {
-      await request(app.getHttpServer())
-        .get('/api/v1/audit-log')
-        .set('Authorization', `Bearer ${getToken()}`)
-        .expect(403);
-    });
+    it.each(deniedTokens())(
+      '%s gets 403 listing audit log entries',
+      async (_role, getToken) => {
+        await request(app.getHttpServer())
+          .get('/api/v1/audit-log')
+          .set('Authorization', `Bearer ${getToken()}`)
+          .expect(403);
+      },
+    );
   });
 });

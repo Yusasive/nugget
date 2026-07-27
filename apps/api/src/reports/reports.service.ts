@@ -24,8 +24,7 @@ import {
 } from './reports.util';
 
 type BranchScope =
-  | { mode: 'single'; branchId: string }
-  | { mode: 'consolidated' };
+  { mode: 'single'; branchId: string } | { mode: 'consolidated' };
 
 interface BranchLike {
   id: string;
@@ -149,7 +148,12 @@ export class ReportsService {
       }),
     );
     return {
-      ...this.toOccupancyDto({ branchId: null, branchName: null }, start, end, consolidated),
+      ...this.toOccupancyDto(
+        { branchId: null, branchName: null },
+        start,
+        end,
+        consolidated,
+      ),
       byBranch,
     };
   }
@@ -160,7 +164,11 @@ export class ReportsService {
     branchId: string | undefined,
     start: Date,
     end: Date,
-  ): Promise<{ totalSales: Prisma.Decimal; orderCount: number; byOrderType: RestaurantSalesByTypeLine[] }> {
+  ): Promise<{
+    totalSales: Prisma.Decimal;
+    orderCount: number;
+    byOrderType: RestaurantSalesByTypeLine[];
+  }> {
     const orders = await this.prisma.restaurantOrder.findMany({
       where: {
         status: 'PAID',
@@ -171,7 +179,10 @@ export class ReportsService {
     });
 
     let totalSales = new Prisma.Decimal(0);
-    const byType = new Map<string, { total: Prisma.Decimal; orderCount: number }>();
+    const byType = new Map<
+      string,
+      { total: Prisma.Decimal; orderCount: number }
+    >();
     for (const order of orders) {
       const orderTotal = computeOrderTotal(order.items);
       totalSales = totalSales.add(orderTotal);
@@ -203,7 +214,10 @@ export class ReportsService {
     const { start, end } = parseDateRange(query.from, query.to);
     const scope = this.resolveScope(actor, query.branchId);
 
-    const toDto = (branch: BranchScopeDto, sales: Awaited<ReturnType<ReportsService['computeRestaurantSales']>>): RestaurantSalesReportDto => ({
+    const toDto = (
+      branch: BranchScopeDto,
+      sales: Awaited<ReturnType<ReportsService['computeRestaurantSales']>>,
+    ): RestaurantSalesReportDto => ({
       ...branch,
       from: start.toISOString(),
       to: end.toISOString(),
@@ -228,7 +242,10 @@ export class ReportsService {
         return toDto({ branchId: branch.id, branchName: branch.name }, sales);
       }),
     );
-    return { ...toDto({ branchId: null, branchName: null }, consolidated), byBranch };
+    return {
+      ...toDto({ branchId: null, branchName: null }, consolidated),
+      byBranch,
+    };
   }
 
   // --- Inventory valuation ----------------------------------------------
@@ -263,7 +280,9 @@ export class ReportsService {
 
     const toDto = (
       branch: BranchScopeDto,
-      valuation: Awaited<ReturnType<ReportsService['computeInventoryValuation']>>,
+      valuation: Awaited<
+        ReturnType<ReportsService['computeInventoryValuation']>
+      >,
     ): InventoryReportDto => ({
       ...branch,
       totalValue: valuation.totalValue.toString(),
@@ -284,10 +303,16 @@ export class ReportsService {
     const byBranch = await Promise.all(
       branches.map(async (branch) => {
         const valuation = await this.computeInventoryValuation(branch.id);
-        return toDto({ branchId: branch.id, branchName: branch.name }, valuation);
+        return toDto(
+          { branchId: branch.id, branchName: branch.name },
+          valuation,
+        );
       }),
     );
-    return { ...toDto({ branchId: null, branchName: null }, consolidated), byBranch };
+    return {
+      ...toDto({ branchId: null, branchName: null }, consolidated),
+      byBranch,
+    };
   }
 
   // --- Expenses -----------------------------------------------------------
@@ -296,7 +321,10 @@ export class ReportsService {
     branchId: string | undefined,
     start: Date,
     end: Date,
-  ): Promise<{ totalExpenses: Prisma.Decimal; byCategory: ExpenseCategoryLineDto[] }> {
+  ): Promise<{
+    totalExpenses: Prisma.Decimal;
+    byCategory: ExpenseCategoryLineDto[];
+  }> {
     const expenses = await this.prisma.expense.findMany({
       where: {
         status: 'APPROVED',
@@ -306,7 +334,10 @@ export class ReportsService {
       include: { category: true },
     });
 
-    const byCategory = new Map<string, { name: string; total: Prisma.Decimal }>();
+    const byCategory = new Map<
+      string,
+      { name: string; total: Prisma.Decimal }
+    >();
     let totalExpenses = new Prisma.Decimal(0);
     for (const expense of expenses) {
       totalExpenses = totalExpenses.add(expense.amount);
@@ -364,7 +395,10 @@ export class ReportsService {
         return toDto({ branchId: branch.id, branchName: branch.name }, report);
       }),
     );
-    return { ...toDto({ branchId: null, branchName: null }, consolidated), byBranch };
+    return {
+      ...toDto({ branchId: null, branchName: null }, consolidated),
+      byBranch,
+    };
   }
 
   // --- Profit & Loss --------------------------------------------------------
@@ -455,6 +489,9 @@ export class ReportsService {
         return toDto({ branchId: branch.id, branchName: branch.name }, pl);
       }),
     );
-    return { ...toDto({ branchId: null, branchName: null }, consolidated), byBranch };
+    return {
+      ...toDto({ branchId: null, branchName: null }, consolidated),
+      byBranch,
+    };
   }
 }

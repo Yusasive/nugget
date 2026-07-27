@@ -33,9 +33,9 @@ describe('assertForwardKitchenTransition', () => {
   });
 
   it('rejects skipping a step', () => {
-    expect(() =>
-      assertForwardKitchenTransition('PENDING', 'READY'),
-    ).toThrow(ConflictException);
+    expect(() => assertForwardKitchenTransition('PENDING', 'READY')).toThrow(
+      ConflictException,
+    );
   });
 
   it('rejects moving backward', () => {
@@ -45,8 +45,8 @@ describe('assertForwardKitchenTransition', () => {
   });
 
   it('rejects a no-op transition', () => {
-    expect(() =>
-      assertForwardKitchenTransition('PENDING', 'PENDING'),
-    ).toThrow(ConflictException);
+    expect(() => assertForwardKitchenTransition('PENDING', 'PENDING')).toThrow(
+      ConflictException,
+    );
   });
 });

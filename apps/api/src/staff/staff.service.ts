@@ -165,7 +165,11 @@ export class StaffService {
         action: 'staff.update-profile',
         entityType: 'Staff',
         entityId: staff.id,
-        metadata: { firstName: dto.firstName, lastName: dto.lastName, phoneChanged: dto.phone !== undefined },
+        metadata: {
+          firstName: dto.firstName,
+          lastName: dto.lastName,
+          phoneChanged: dto.phone !== undefined,
+        },
       });
       return toStaffDto(staff);
     });

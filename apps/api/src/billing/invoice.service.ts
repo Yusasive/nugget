@@ -114,7 +114,7 @@ export class InvoiceService {
     }
     if (tourBooking.linkedBookingId) {
       throw new BadRequestException(
-        'A tour bundled with a room stay is invoiced via that booking\'s folio, not its own invoice',
+        "A tour bundled with a room stay is invoiced via that booking's folio, not its own invoice",
       );
     }
     if (tourBooking.status !== 'CONFIRMED') {

@@ -44,9 +44,7 @@ export class RestaurantTableController {
 
   @Post()
   @Roles('SUPER_ADMIN', 'BRANCH_MANAGER', 'RESTAURANT_STAFF')
-  create(
-    @Body() dto: CreateRestaurantTableDto,
-  ): Promise<RestaurantTableDto> {
+  create(@Body() dto: CreateRestaurantTableDto): Promise<RestaurantTableDto> {
     return this.restaurantTableService.create(dto);
   }
 

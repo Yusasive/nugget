@@ -5,9 +5,7 @@ import {
   type RestaurantOrderType,
 } from '@nugget/shared-types';
 
-export class CreateRestaurantOrderDto
-  implements CreateRestaurantOrderRequestBody
-{
+export class CreateRestaurantOrderDto implements CreateRestaurantOrderRequestBody {
   @IsEnum(RESTAURANT_ORDER_TYPES)
   orderType: RestaurantOrderType;
 

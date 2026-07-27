@@ -1,12 +1,18 @@
 import { BadRequestException } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client';
-import { assertNonEmptyLineItems, computePurchaseTotal } from './purchase-record.util';
+import {
+  assertNonEmptyLineItems,
+  computePurchaseTotal,
+} from './purchase-record.util';
 
 describe('computePurchaseTotal', () => {
   it('sums quantity * unitCost across line items', () => {
     const total = computePurchaseTotal([
       { quantity: '10', unitCost: '5.50' },
-      { quantity: new Prisma.Decimal('2'), unitCost: new Prisma.Decimal('100.00') },
+      {
+        quantity: new Prisma.Decimal('2'),
+        unitCost: new Prisma.Decimal('100.00'),
+      },
     ]);
     expect(total.toString()).toBe('255');
   });

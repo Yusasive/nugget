@@ -30,7 +30,11 @@ const VIEW_ROLES = [
   'ACCOUNTANT',
   'RESTAURANT_STAFF',
 ] as const;
-const WRITE_ROLES = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'RESTAURANT_STAFF'] as const;
+const WRITE_ROLES = [
+  'SUPER_ADMIN',
+  'BRANCH_MANAGER',
+  'RESTAURANT_STAFF',
+] as const;
 
 @Controller('restaurant-orders')
 @UseGuards(JwtAuthGuard, RolesGuard)

@@ -64,7 +64,10 @@ export class InventoryItemController {
     @Param('id') id: string,
     @Body() dto: RecordStockMovementDto,
     @CurrentUser() actor: ActorContext,
-  ): Promise<{ item: InventoryItemDto; movement: Pick<StockMovementDto, 'id'> }> {
+  ): Promise<{
+    item: InventoryItemDto;
+    movement: Pick<StockMovementDto, 'id'>;
+  }> {
     return this.inventoryItemService.recordMovement(id, dto, actor);
   }
 }

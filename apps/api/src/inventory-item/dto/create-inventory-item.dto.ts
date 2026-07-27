@@ -21,6 +21,8 @@ export class CreateInventoryItemDto implements CreateInventoryItemRequestBody {
   })
   reorderThreshold: string;
 
-  @Matches(MONEY_PATTERN, { message: 'unitCost must look like "10" or "10.00"' })
+  @Matches(MONEY_PATTERN, {
+    message: 'unitCost must look like "10" or "10.00"',
+  })
   unitCost: string;
 }

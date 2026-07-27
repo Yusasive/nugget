@@ -129,7 +129,9 @@ export function computeOccupancyMetrics(
 
   const occupancyRate =
     availableRoomNights > 0
-      ? new Prisma.Decimal(occupiedRoomNights).div(availableRoomNights).toDecimalPlaces(4)
+      ? new Prisma.Decimal(occupiedRoomNights)
+          .div(availableRoomNights)
+          .toDecimalPlaces(4)
       : new Prisma.Decimal(0);
   const adr =
     occupiedRoomNights > 0
@@ -140,23 +142,30 @@ export function computeOccupancyMetrics(
       ? roomRevenue.div(availableRoomNights).toDecimalPlaces(2)
       : new Prisma.Decimal(0);
 
-  return { availableRoomNights, occupiedRoomNights, occupancyRate, roomRevenue, adr, revPar };
+  return {
+    availableRoomNights,
+    occupiedRoomNights,
+    occupancyRate,
+    roomRevenue,
+    adr,
+    revPar,
+  };
 }
 
 /** Minimal CSV serializer — values are stringified and quoted only when
  * they contain a comma/quote/newline, no dependency needed for the
  * report-shaped, all-scalar rows this codebase ever exports. */
-export function toCsv<T extends object>(
-  columns: { key: keyof T & string; label: string }[],
-  rows: T[],
-): string {
-  const escape = (value: unknown): string => {
-    const str = value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value as string | number | boolean);
+export function toCsv<
+  T extends Record<string, string | number | boolean | null | undefined>,
+>(columns: { key: keyof T & string; label: string }[], rows: T[]): string {
+  const escape = (
+    value: string | number | boolean | null | undefined,
+  ): string => {
+    const str = value === null || value === undefined ? '' : String(value);
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
   const header = columns.map((c) => escape(c.label)).join(',');
   const lines = rows.map((row) =>
-    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     columns.map((c) => escape(row[c.key])).join(','),
   );
   return [header, ...lines].join('\n');

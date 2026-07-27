@@ -212,8 +212,7 @@ export class TourDepartureService {
               departureAt,
               returnAt,
               totalSeats: dto.totalSeats ?? tourPackage.defaultCapacity,
-              pricePerSeat:
-                dto.pricePerSeat ?? tourPackage.defaultPricePerSeat,
+              pricePerSeat: dto.pricePerSeat ?? tourPackage.defaultPricePerSeat,
               notes: dto.notes,
               createdByStaffId: actor.staffId,
             },

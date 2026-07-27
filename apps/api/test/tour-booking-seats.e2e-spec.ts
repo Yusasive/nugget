@@ -145,9 +145,15 @@ describe('Tour booking seat concurrency (e2e)', () => {
     expect(succeeded.length).toBeLessThanOrEqual(2);
 
     const activeBookings = await prisma.tourBooking.findMany({
-      where: { tourDepartureId: departureId, status: { in: ['HELD', 'CONFIRMED'] } },
+      where: {
+        tourDepartureId: departureId,
+        status: { in: ['HELD', 'CONFIRMED'] },
+      },
     });
-    const totalBookedSeats = activeBookings.reduce((sum, b) => sum + b.seats, 0);
+    const totalBookedSeats = activeBookings.reduce(
+      (sum, b) => sum + b.seats,
+      0,
+    );
     expect(totalBookedSeats).toBeLessThanOrEqual(5);
     expect(totalBookedSeats).toBe(succeeded.length * 2);
   });
@@ -196,6 +202,8 @@ describe('Tour booking seat concurrency (e2e)', () => {
       .get(`/api/v1/tour-departures/${departureId}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect((departureRes.body as { availableSeats: number }).availableSeats).toBe(1);
+    expect(
+      (departureRes.body as { availableSeats: number }).availableSeats,
+    ).toBe(1);
   });
 });

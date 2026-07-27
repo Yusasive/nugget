@@ -51,7 +51,9 @@ export class InventoryItemService {
         where,
         orderBy: { name: 'asc' },
       });
-      const lowStock = all.filter((i) => i.quantityOnHand.lte(i.reorderThreshold));
+      const lowStock = all.filter((i) =>
+        i.quantityOnHand.lte(i.reorderThreshold),
+      );
       return buildPaginatedResponse(
         lowStock.slice(skip, skip + take).map(toInventoryItemDto),
         lowStock.length,
@@ -110,7 +112,10 @@ export class InventoryItemService {
     id: string,
     dto: RecordStockMovementDto,
     actor: ActorContext,
-  ): Promise<{ item: InventoryItemDto; movement: Pick<StockMovementDto, 'id'> }> {
+  ): Promise<{
+    item: InventoryItemDto;
+    movement: Pick<StockMovementDto, 'id'>;
+  }> {
     const existing = await this.findOneOrThrow(id);
 
     return this.prisma.$transaction(async (tx) => {
@@ -128,7 +133,11 @@ export class InventoryItemService {
         action: 'inventory-item.stock-movement',
         entityType: 'InventoryItem',
         entityId: id,
-        metadata: { type: dto.type, quantity: dto.quantity, reason: dto.reason },
+        metadata: {
+          type: dto.type,
+          quantity: dto.quantity,
+          reason: dto.reason,
+        },
       });
       return { item: toInventoryItemDto(item), movement: { id: movementId } };
     });

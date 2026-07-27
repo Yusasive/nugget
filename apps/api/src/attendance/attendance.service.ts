@@ -19,7 +19,9 @@ import { ATTENDANCE_INCLUDE, toAttendanceDto } from './attendance.mapper';
 import { ListAttendanceQueryDto } from './dto/list-attendance-query.dto';
 
 function startOfUtcDay(date: Date): Date {
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  return new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+  );
 }
 
 @Injectable()

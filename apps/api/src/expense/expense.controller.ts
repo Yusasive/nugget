@@ -22,19 +22,39 @@ export class ExpenseController {
   constructor(private readonly expenseService: ExpenseService) {}
 
   @Get()
-  @Roles('SUPER_ADMIN', 'BRANCH_MANAGER', 'ACCOUNTANT', 'FRONT_DESK', 'RESTAURANT_STAFF')
-  list(@Query() query: ListExpensesQueryDto): Promise<PaginatedResponse<ExpenseDto>> {
+  @Roles(
+    'SUPER_ADMIN',
+    'BRANCH_MANAGER',
+    'ACCOUNTANT',
+    'FRONT_DESK',
+    'RESTAURANT_STAFF',
+  )
+  list(
+    @Query() query: ListExpensesQueryDto,
+  ): Promise<PaginatedResponse<ExpenseDto>> {
     return this.expenseService.list(query);
   }
 
   @Get(':id')
-  @Roles('SUPER_ADMIN', 'BRANCH_MANAGER', 'ACCOUNTANT', 'FRONT_DESK', 'RESTAURANT_STAFF')
+  @Roles(
+    'SUPER_ADMIN',
+    'BRANCH_MANAGER',
+    'ACCOUNTANT',
+    'FRONT_DESK',
+    'RESTAURANT_STAFF',
+  )
   findOne(@Param('id') id: string): Promise<ExpenseDto> {
     return this.expenseService.findOneOrThrow(id);
   }
 
   @Post()
-  @Roles('SUPER_ADMIN', 'BRANCH_MANAGER', 'ACCOUNTANT', 'FRONT_DESK', 'RESTAURANT_STAFF')
+  @Roles(
+    'SUPER_ADMIN',
+    'BRANCH_MANAGER',
+    'ACCOUNTANT',
+    'FRONT_DESK',
+    'RESTAURANT_STAFF',
+  )
   create(@Body() dto: CreateExpenseDto): Promise<ExpenseDto> {
     return this.expenseService.create(dto);
   }

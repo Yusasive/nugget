@@ -60,7 +60,10 @@ describe('UAT — Simulated Day (e2e)', () => {
     return d.toISOString().slice(0, 10);
   }
 
-  async function createStaffAndLogin(roleName: string, label: string): Promise<string> {
+  async function createStaffAndLogin(
+    roleName: string,
+    label: string,
+  ): Promise<string> {
     const rolesRes = await http
       .get('/api/v1/roles')
       .set('Authorization', `Bearer ${superAdminToken}`)
@@ -72,7 +75,14 @@ describe('UAT — Simulated Day (e2e)', () => {
     await http
       .post('/api/v1/staff')
       .set('Authorization', `Bearer ${superAdminToken}`)
-      .send({ branchId, roleId: role.id, email, password: STAFF_PASSWORD, firstName: label, lastName: 'UAT' })
+      .send({
+        branchId,
+        roleId: role.id,
+        email,
+        password: STAFF_PASSWORD,
+        firstName: label,
+        lastName: 'UAT',
+      })
       .expect(201);
 
     const login = await http
@@ -87,12 +97,25 @@ describe('UAT — Simulated Day (e2e)', () => {
       imports: [AppModule],
     })
       .overrideProvider(ThrottlerStorage)
-      .useValue({ increment: () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
+      .useValue({
+        increment: () => ({
+          totalHits: 1,
+          timeToExpire: 0,
+          isBlocked: false,
+          timeToBlockExpire: 0,
+        }),
+      })
       .compile();
 
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
-    app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     await app.init();
     http = request(app.getHttpServer());
 
@@ -100,7 +123,10 @@ describe('UAT — Simulated Day (e2e)', () => {
 
     const login = await http
       .post('/api/v1/auth/login')
-      .send({ email: SEED_SUPER_ADMIN_EMAIL, password: SEED_SUPER_ADMIN_PASSWORD })
+      .send({
+        email: SEED_SUPER_ADMIN_EMAIL,
+        password: SEED_SUPER_ADMIN_PASSWORD,
+      })
       .expect(200);
     superAdminToken = (login.body as LoginResponse).accessToken;
 
@@ -132,7 +158,12 @@ describe('UAT — Simulated Day (e2e)', () => {
     const ratePlanRes = await http
       .post('/api/v1/rate-plans')
       .set('Authorization', `Bearer ${superAdminToken}`)
-      .send({ roomTypeId, name: 'Standard', type: 'STANDARD', pricePerNight: '200.00' })
+      .send({
+        roomTypeId,
+        name: 'Standard',
+        type: 'STANDARD',
+        pricePerNight: '200.00',
+      })
       .expect(201);
     ratePlanId = (ratePlanRes.body as { id: string }).id;
 
@@ -140,7 +171,13 @@ describe('UAT — Simulated Day (e2e)', () => {
     const packageRes = await http
       .post('/api/v1/tour-packages')
       .set('Authorization', `Bearer ${superAdminToken}`)
-      .send({ branchId, name: `UAT Tour ${suffix}`, durationMinutes: 240, defaultPricePerSeat: '50.00', defaultCapacity: 10 })
+      .send({
+        branchId,
+        name: `UAT Tour ${suffix}`,
+        durationMinutes: 240,
+        defaultPricePerSeat: '50.00',
+        defaultCapacity: 10,
+      })
       .expect(201);
     tourPackageId = (packageRes.body as { id: string }).id;
 
@@ -155,7 +192,12 @@ describe('UAT — Simulated Day (e2e)', () => {
     const itemRes = await http
       .post('/api/v1/menu-items')
       .set('Authorization', `Bearer ${restaurantStaffToken}`)
-      .send({ branchId, categoryId: menuCategoryId, name: 'Jollof Rice', price: '2500.00' })
+      .send({
+        branchId,
+        categoryId: menuCategoryId,
+        name: 'Jollof Rice',
+        price: '2500.00',
+      })
       .expect(201);
     menuItemId = (itemRes.body as { id: string }).id;
 
@@ -205,7 +247,11 @@ describe('UAT — Simulated Day (e2e)', () => {
           ratePlanId,
           checkInDate: todayIso(0),
           checkOutDate: todayIso(2),
-          guest: { firstName: 'UAT', lastName: 'Guest', email: `${randomUUID()}@uat.local` },
+          guest: {
+            firstName: 'UAT',
+            lastName: 'Guest',
+            email: `${randomUUID()}@uat.local`,
+          },
         })
         .expect(201);
       bookingId = (bookingRes.body as BookingDto).id;
@@ -229,7 +275,9 @@ describe('UAT — Simulated Day (e2e)', () => {
         .set('Authorization', `Bearer ${frontDeskToken}`)
         .expect(200);
       const txns = (shiftRes.body as ShiftDto).transactions;
-      expect(txns.some((t) => t.bookingId === bookingId && t.type === 'CASH_IN')).toBe(true);
+      expect(
+        txns.some((t) => t.bookingId === bookingId && t.type === 'CASH_IN'),
+      ).toBe(true);
     });
 
     it('restaurant staff creates a room-service order linked to the booking and bills it — folio charge appears', async () => {
@@ -259,7 +307,9 @@ describe('UAT — Simulated Day (e2e)', () => {
       const rsItemId = (sentOrder.body as RestaurantOrderDto).items[0].id;
       for (const status of ['PREPARING', 'READY', 'SERVED'] as const) {
         await http
-          .patch(`/api/v1/restaurant-orders/${rsOrderId}/items/${rsItemId}/kitchen-status`)
+          .patch(
+            `/api/v1/restaurant-orders/${rsOrderId}/items/${rsItemId}/kitchen-status`,
+          )
           .set('Authorization', `Bearer ${restaurantStaffToken}`)
           .send({ status })
           .expect(200);
@@ -352,23 +402,31 @@ describe('UAT — Simulated Day (e2e)', () => {
 
     it('kitchen advances item through PREPARING → READY → SERVED', async () => {
       await http
-        .patch(`/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`)
+        .patch(
+          `/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`,
+        )
         .set('Authorization', `Bearer ${restaurantStaffToken}`)
         .send({ status: 'PREPARING' })
         .expect(200);
 
       await http
-        .patch(`/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`)
+        .patch(
+          `/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`,
+        )
         .set('Authorization', `Bearer ${restaurantStaffToken}`)
         .send({ status: 'READY' })
         .expect(200);
 
       const res = await http
-        .patch(`/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`)
+        .patch(
+          `/api/v1/restaurant-orders/${orderId}/items/${orderItemId}/kitchen-status`,
+        )
         .set('Authorization', `Bearer ${restaurantStaffToken}`)
         .send({ status: 'SERVED' })
         .expect(200);
-      const item = (res.body as RestaurantOrderDto).items.find((i) => i.id === orderItemId);
+      const item = (res.body as RestaurantOrderDto).items.find(
+        (i) => i.id === orderItemId,
+      );
       expect(item?.kitchenStatus).toBe('SERVED');
     });
 
@@ -432,7 +490,11 @@ describe('UAT — Simulated Day (e2e)', () => {
         .send({
           tourDepartureId: departureId,
           seats: 2,
-          guest: { firstName: 'Tour', lastName: 'Guest', email: `${randomUUID()}@uat.local` },
+          guest: {
+            firstName: 'Tour',
+            lastName: 'Guest',
+            email: `${randomUUID()}@uat.local`,
+          },
         })
         .expect(201);
       tourBookingId = (created.body as TourBookingDto).id;
@@ -459,7 +521,9 @@ describe('UAT — Simulated Day (e2e)', () => {
         .expect(200);
       expect(res.body).toHaveProperty('id', departureId);
       // The departure DTO nests the package under tourPackage, not tourPackageId
-      expect((res.body as { tourPackage: { id: string } }).tourPackage.id).toBe(tourPackageId);
+      expect((res.body as { tourPackage: { id: string } }).tourPackage.id).toBe(
+        tourPackageId,
+      );
     });
   });
 
@@ -482,13 +546,21 @@ describe('UAT — Simulated Day (e2e)', () => {
       await http
         .post(`/api/v1/shifts/${shiftId}/transactions`)
         .set('Authorization', `Bearer ${frontDeskToken}`)
-        .send({ type: 'CASH_IN', amount: '3000.00', description: 'Room 201 payment' })
+        .send({
+          type: 'CASH_IN',
+          amount: '3000.00',
+          description: 'Room 201 payment',
+        })
         .expect(201);
 
       await http
         .post(`/api/v1/shifts/${shiftId}/transactions`)
         .set('Authorization', `Bearer ${frontDeskToken}`)
-        .send({ type: 'CASH_IN', amount: '1500.00', description: 'Room 202 payment' })
+        .send({
+          type: 'CASH_IN',
+          amount: '1500.00',
+          description: 'Room 202 payment',
+        })
         .expect(201);
 
       const res = await http

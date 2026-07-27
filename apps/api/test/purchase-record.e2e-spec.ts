@@ -57,7 +57,10 @@ describe('Purchase records — atomicity (e2e)', () => {
 
     const superAdminLogin = await http
       .post('/api/v1/auth/login')
-      .send({ email: SEED_SUPER_ADMIN_EMAIL, password: SEED_SUPER_ADMIN_PASSWORD })
+      .send({
+        email: SEED_SUPER_ADMIN_EMAIL,
+        password: SEED_SUPER_ADMIN_PASSWORD,
+      })
       .expect(200);
     superAdminToken = (superAdminLogin.body as LoginResponse).accessToken;
 
@@ -94,7 +97,10 @@ describe('Purchase records — atomicity (e2e)', () => {
 
     const staffLogin = await http
       .post('/api/v1/auth/login')
-      .send({ email: `restaurant-staff-${suffix}@test.local`, password: STAFF_PASSWORD })
+      .send({
+        email: `restaurant-staff-${suffix}@test.local`,
+        password: STAFF_PASSWORD,
+      })
       .expect(200);
     staffToken = (staffLogin.body as LoginResponse).accessToken;
 
@@ -108,7 +114,13 @@ describe('Purchase records — atomicity (e2e)', () => {
     const itemARes = await http
       .post('/api/v1/inventory-items')
       .set('Authorization', `Bearer ${staffToken}`)
-      .send({ branchId, name: 'Rice (bag)', unit: 'kg', reorderThreshold: '20', unitCost: '5.00' })
+      .send({
+        branchId,
+        name: 'Rice (bag)',
+        unit: 'kg',
+        reorderThreshold: '20',
+        unitCost: '5.00',
+      })
       .expect(201);
     itemAId = (itemARes.body as InventoryItemDto).id;
   });
@@ -128,7 +140,9 @@ describe('Purchase records — atomicity (e2e)', () => {
         .set('Authorization', `Bearer ${staffToken}`)
         .expect(200),
     ]);
-    const expensesBeforeCount = (expensesBefore.body as PaginatedResponse<ExpenseDto>).total;
+    const expensesBeforeCount = (
+      expensesBefore.body as PaginatedResponse<ExpenseDto>
+    ).total;
     expect((itemBefore.body as InventoryItemDto).quantityOnHand).toBe('0');
 
     await http
@@ -184,7 +198,9 @@ describe('Purchase records — atomicity (e2e)', () => {
       .send({
         branchId,
         supplierId,
-        lineItems: [{ inventoryItemId: itemAId, quantity: '100', unitCost: '4.50' }],
+        lineItems: [
+          { inventoryItemId: itemAId, quantity: '100', unitCost: '4.50' },
+        ],
       })
       .expect(201);
     const purchase = purchaseRes.body as PurchaseRecordDto;

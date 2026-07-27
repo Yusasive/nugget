@@ -1,8 +1,4 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import type {
   PaginatedResponse,
   PurchaseLineItem,
@@ -27,7 +23,10 @@ import {
   toPurchaseRecordDto,
   type PurchaseRecordWithRelations,
 } from './purchase-record.mapper';
-import { assertNonEmptyLineItems, computePurchaseTotal } from './purchase-record.util';
+import {
+  assertNonEmptyLineItems,
+  computePurchaseTotal,
+} from './purchase-record.util';
 
 @Injectable()
 export class PurchaseRecordService {
@@ -50,7 +49,10 @@ export class PurchaseRecordService {
         where,
         skip,
         take,
-        include: { ...PURCHASE_RECORD_INCLUDE, expense: { select: { id: true } } },
+        include: {
+          ...PURCHASE_RECORD_INCLUDE,
+          expense: { select: { id: true } },
+        },
         orderBy: { purchasedAt: 'desc' },
       }),
       this.scopedPrisma.purchaseRecord.count({ where }),
@@ -66,12 +68,15 @@ export class PurchaseRecordService {
   async findOneOrThrow(id: string): Promise<PurchaseRecordDto> {
     const record = await this.scopedPrisma.purchaseRecord.findUnique({
       where: { id },
-      include: { ...PURCHASE_RECORD_INCLUDE, expense: { select: { id: true } } },
+      include: {
+        ...PURCHASE_RECORD_INCLUDE,
+        expense: { select: { id: true } },
+      },
     });
     if (!record) {
       throw new NotFoundException('Purchase record not found');
     }
-    return toPurchaseRecordDto(record as PurchaseRecordWithRelations);
+    return toPurchaseRecordDto(record);
   }
 
   /**
@@ -88,7 +93,8 @@ export class PurchaseRecordService {
     actor: ActorContext,
   ): Promise<PurchaseRecordDto> {
     assertNonEmptyLineItems(dto.lineItems);
-    const branchId = actor.role === 'SUPER_ADMIN' ? dto.branchId : actor.branchId;
+    const branchId =
+      actor.role === 'SUPER_ADMIN' ? dto.branchId : actor.branchId;
 
     return this.prisma.$transaction(async (tx) => {
       const supplier = await tx.supplier.findUnique({
@@ -140,7 +146,10 @@ export class PurchaseRecordService {
         });
       }
 
-      const categoryId = await findOrCreateRestaurantPurchasesCategory(tx, branchId);
+      const categoryId = await findOrCreateRestaurantPurchasesCategory(
+        tx,
+        branchId,
+      );
       await tx.expense.create({
         data: {
           branchId,
@@ -159,14 +168,20 @@ export class PurchaseRecordService {
         action: 'purchase-record.create',
         entityType: 'PurchaseRecord',
         entityId: purchaseRecord.id,
-        metadata: { totalCost: totalCost.toString(), lineItemCount: dto.lineItems.length },
+        metadata: {
+          totalCost: totalCost.toString(),
+          lineItemCount: dto.lineItems.length,
+        },
       });
 
       const withRelations = await tx.purchaseRecord.findUniqueOrThrow({
         where: { id: purchaseRecord.id },
-        include: { ...PURCHASE_RECORD_INCLUDE, expense: { select: { id: true } } },
+        include: {
+          ...PURCHASE_RECORD_INCLUDE,
+          expense: { select: { id: true } },
+        },
       });
-      return toPurchaseRecordDto(withRelations as PurchaseRecordWithRelations);
+      return toPurchaseRecordDto(withRelations);
     });
   }
 }

@@ -1,4 +1,10 @@
-import { IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MinLength,
+} from 'class-validator';
 import type { CreateMenuItemRequestBody } from '@nugget/shared-types';
 
 const MONEY_PATTERN = /^\d+(\.\d{1,2})?$/;

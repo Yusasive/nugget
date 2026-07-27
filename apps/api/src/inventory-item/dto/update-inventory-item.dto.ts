@@ -1,4 +1,10 @@
-import { IsBoolean, IsOptional, IsString, Matches, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  Matches,
+  MinLength,
+} from 'class-validator';
 import type { UpdateInventoryItemRequestBody } from '@nugget/shared-types';
 
 const DECIMAL_PATTERN = /^\d+(\.\d{1,3})?$/;
@@ -22,7 +28,9 @@ export class UpdateInventoryItemDto implements UpdateInventoryItemRequestBody {
   reorderThreshold?: string;
 
   @IsOptional()
-  @Matches(MONEY_PATTERN, { message: 'unitCost must look like "10" or "10.00"' })
+  @Matches(MONEY_PATTERN, {
+    message: 'unitCost must look like "10" or "10.00"',
+  })
   unitCost?: string;
 
   @IsOptional()

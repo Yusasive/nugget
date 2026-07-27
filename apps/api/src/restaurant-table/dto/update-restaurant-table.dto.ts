@@ -8,9 +8,7 @@ import {
 } from 'class-validator';
 import type { UpdateRestaurantTableRequestBody } from '@nugget/shared-types';
 
-export class UpdateRestaurantTableDto
-  implements UpdateRestaurantTableRequestBody
-{
+export class UpdateRestaurantTableDto implements UpdateRestaurantTableRequestBody {
   @IsOptional()
   @IsString()
   @MinLength(1)

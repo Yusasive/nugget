@@ -5,9 +5,7 @@ import {
   type UpdateHousekeepingTaskRequestBody,
 } from '@nugget/shared-types';
 
-export class UpdateHousekeepingTaskDto
-  implements UpdateHousekeepingTaskRequestBody
-{
+export class UpdateHousekeepingTaskDto implements UpdateHousekeepingTaskRequestBody {
   @IsOptional()
   @IsUUID()
   assignedToStaffId?: string | null;

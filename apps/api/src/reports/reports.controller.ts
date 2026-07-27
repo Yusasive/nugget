@@ -25,7 +25,11 @@ function sendCsv(res: Response, filename: string, csv: string): void {
   res.send(csv);
 }
 
-const MANAGEMENT_ROLES = ['SUPER_ADMIN', 'BRANCH_MANAGER', 'ACCOUNTANT'] as const;
+const MANAGEMENT_ROLES = [
+  'SUPER_ADMIN',
+  'BRANCH_MANAGER',
+  'ACCOUNTANT',
+] as const;
 
 @Controller('reports')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -70,7 +74,10 @@ export class ReportsController {
     @CurrentUser() actor: ActorContext,
     @Res() res: Response,
   ): Promise<void> {
-    const report = await this.reportsService.getRestaurantSalesReport(query, actor);
+    const report = await this.reportsService.getRestaurantSalesReport(
+      query,
+      actor,
+    );
     if (format === 'csv') {
       const csv = toCsv(
         [

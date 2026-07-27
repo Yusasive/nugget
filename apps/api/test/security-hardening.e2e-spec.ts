@@ -25,7 +25,11 @@ describe('Security hardening (e2e)', () => {
     app = moduleFixture.createNestApplication();
     app.setGlobalPrefix('api/v1');
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, transform: true, forbidNonWhitelisted: true }),
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
     );
     await app.init();
   });
@@ -43,9 +47,10 @@ describe('Security hardening (e2e)', () => {
     // real session or trigger account-lockout logic.
     const attempts = await Promise.all(
       Array.from({ length: 11 }, () =>
-        http
-          .post('/api/v1/auth/login')
-          .send({ email: SEED_SUPER_ADMIN_EMAIL, password: 'wrong-password-for-throttle-test' }),
+        http.post('/api/v1/auth/login').send({
+          email: SEED_SUPER_ADMIN_EMAIL,
+          password: 'wrong-password-for-throttle-test',
+        }),
       ),
     );
 

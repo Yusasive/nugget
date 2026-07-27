@@ -5,9 +5,7 @@ import {
   type SetRestaurantTableStatusRequestBody,
 } from '@nugget/shared-types';
 
-export class SetRestaurantTableStatusDto
-  implements SetRestaurantTableStatusRequestBody
-{
+export class SetRestaurantTableStatusDto implements SetRestaurantTableStatusRequestBody {
   @IsEnum(RESTAURANT_TABLE_STATUSES)
   status: RestaurantTableStatus;
 }

@@ -5,9 +5,7 @@ import {
   type UpdateKitchenItemStatusRequestBody,
 } from '@nugget/shared-types';
 
-export class UpdateKitchenItemStatusDto
-  implements UpdateKitchenItemStatusRequestBody
-{
+export class UpdateKitchenItemStatusDto implements UpdateKitchenItemStatusRequestBody {
   @IsEnum(KITCHEN_ITEM_STATUSES)
   status: KitchenItemStatus;
 }

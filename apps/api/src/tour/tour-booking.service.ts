@@ -277,9 +277,7 @@ export class TourBookingService {
    * the database, and a row-locked read of currently-active bookings inside
    * one Postgres transaction is the authoritative backstop.
    */
-  private async createCore(
-    params: CreateCoreParams,
-  ): Promise<TourBookingDto> {
+  private async createCore(params: CreateCoreParams): Promise<TourBookingDto> {
     return this.redisLock.withLock(
       `lock:tour-departure:${params.tourDepartureId}`,
       () =>
@@ -328,7 +326,10 @@ export class TourBookingService {
             const linkedBooking = await tx.booking.findUnique({
               where: { id: params.linkedBookingId },
             });
-            if (!linkedBooking || linkedBooking.branchId !== departure.branchId) {
+            if (
+              !linkedBooking ||
+              linkedBooking.branchId !== departure.branchId
+            ) {
               throw new NotFoundException('Linked room booking not found');
             }
             if (

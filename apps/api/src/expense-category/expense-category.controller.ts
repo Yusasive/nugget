@@ -27,9 +27,7 @@ export class ExpenseCategoryController {
 
   @Post()
   @Roles('SUPER_ADMIN', 'BRANCH_MANAGER', 'ACCOUNTANT')
-  create(
-    @Body() dto: CreateExpenseCategoryDto,
-  ): Promise<ExpenseCategoryDto> {
+  create(@Body() dto: CreateExpenseCategoryDto): Promise<ExpenseCategoryDto> {
     return this.expenseCategoryService.create(dto);
   }
 }

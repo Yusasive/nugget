@@ -3,7 +3,10 @@ import { Transform } from 'class-transformer';
 import type { ListGuestsQuery } from '@nugget/shared-types';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 
-export class ListGuestsQueryDto extends PaginationQueryDto implements ListGuestsQuery {
+export class ListGuestsQueryDto
+  extends PaginationQueryDto
+  implements ListGuestsQuery
+{
   @IsOptional()
   @IsString()
   search?: string;

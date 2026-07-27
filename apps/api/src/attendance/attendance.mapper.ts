@@ -21,7 +21,10 @@ export function toAttendanceDto(
       lastName: attendance.staff.lastName,
     },
     department: attendance.staff.department
-      ? { id: attendance.staff.department.id, name: attendance.staff.department.name }
+      ? {
+          id: attendance.staff.department.id,
+          name: attendance.staff.department.name,
+        }
       : null,
     clockIn: attendance.clockIn.toISOString(),
     clockOut: attendance.clockOut ? attendance.clockOut.toISOString() : null,

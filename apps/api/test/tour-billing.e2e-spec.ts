@@ -234,7 +234,9 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .set('Authorization', `Bearer ${token}`)
       .send({ method: 'CASH', amount: tourBooking.totalAmount })
       .expect(201);
-    expect((paymentRes.body as { payment: { status: string } }).payment.status).toBe('SUCCESSFUL');
+    expect(
+      (paymentRes.body as { payment: { status: string } }).payment.status,
+    ).toBe('SUCCESSFUL');
   });
 
   it('rejects issuing a standalone invoice for a bundled tour booking', async () => {
@@ -268,9 +270,9 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .get('/api/v1/roles')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    const coordinatorRole = (rolesRes.body as { id: string; name: string }[]).find(
-      (r) => r.name === 'TOURS_COORDINATOR',
-    );
+    const coordinatorRole = (
+      rolesRes.body as { id: string; name: string }[]
+    ).find((r) => r.name === 'TOURS_COORDINATOR');
     if (!coordinatorRole) {
       throw new Error('TOURS_COORDINATOR role missing from seed data');
     }
@@ -289,9 +291,13 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .expect(201);
     const coordinatorLogin = await http
       .post('/api/v1/auth/login')
-      .send({ email: (staffRes.body as { email: string }).email, password: 'Password123!' })
+      .send({
+        email: (staffRes.body as { email: string }).email,
+        password: 'Password123!',
+      })
       .expect(200);
-    const coordinatorToken = (coordinatorLogin.body as LoginResponse).accessToken;
+    const coordinatorToken = (coordinatorLogin.body as LoginResponse)
+      .accessToken;
 
     // Prove the shared hotel-billing endpoint is still off-limits...
     await http
@@ -312,7 +318,9 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .set('Authorization', `Bearer ${coordinatorToken}`)
       .send({ method: 'CASH', amount: tourBooking.totalAmount })
       .expect(201);
-    expect((paymentRes.body as { payment: { status: string } }).payment.status).toBe('SUCCESSFUL');
+    expect(
+      (paymentRes.body as { payment: { status: string } }).payment.status,
+    ).toBe('SUCCESSFUL');
 
     const latest = await http
       .get(`/api/v1/tour-bookings/${tourBooking.id}/invoice`)

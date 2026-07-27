@@ -11,9 +11,7 @@ import type { CreateTourDepartureRequestBody } from '@nugget/shared-types';
 
 const MONEY_PATTERN = /^\d+(\.\d{1,2})?$/;
 
-export class CreateTourDepartureDto
-  implements CreateTourDepartureRequestBody
-{
+export class CreateTourDepartureDto implements CreateTourDepartureRequestBody {
   @IsUUID()
   tourPackageId: string;
 

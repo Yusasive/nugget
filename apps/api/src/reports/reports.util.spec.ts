@@ -165,8 +165,6 @@ describe('toCsv', () => {
         { name: 'Plain "Rice"', amount: '1000' },
       ],
     );
-    expect(csv).toBe(
-      'Name,Amount\n"Rice, Jollof",2500\n"Plain ""Rice""",1000',
-    );
+    expect(csv).toBe('Name,Amount\n"Rice, Jollof",2500\n"Plain ""Rice""",1000');
   });
 });

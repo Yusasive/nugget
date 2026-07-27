@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import type { GuestProfileDto, PaginatedResponse } from '@nugget/shared-types';
 import {
   buildPaginatedResponse,
@@ -65,8 +70,14 @@ export class GuestService {
     const guest = await this.prisma.guest.findUnique({
       where: { id },
       include: {
-        bookings: { where: { status: { in: ['HELD', 'CONFIRMED', 'CHECKED_IN'] } }, take: 1 },
-        tourBookings: { where: { status: { in: ['HELD', 'CONFIRMED'] } }, take: 1 },
+        bookings: {
+          where: { status: { in: ['HELD', 'CONFIRMED', 'CHECKED_IN'] } },
+          take: 1,
+        },
+        tourBookings: {
+          where: { status: { in: ['HELD', 'CONFIRMED'] } },
+          take: 1,
+        },
       },
     });
     if (!guest) throw new NotFoundException('Guest not found');
