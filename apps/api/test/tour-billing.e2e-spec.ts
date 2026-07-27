@@ -4,6 +4,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import type {
   BookingDto,
   FolioDto,
+  InvoiceDto,
   LoginResponse,
   TourBookingDto,
 } from '@nugget/shared-types';
@@ -223,7 +224,7 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .post(`/api/v1/tour-bookings/${tourBooking.id}/invoices`)
       .set('Authorization', `Bearer ${token}`)
       .expect(201);
-    const invoice = invoiceRes.body as InvoiceDto;
+    const invoice: InvoiceDto = invoiceRes.body as InvoiceDto;
     expect(invoice.bookingId).toBeNull();
     expect(invoice.tourBookingId).toBe(tourBooking.id);
     expect(Number(invoice.totalAmount)).toBe(Number(tourBooking.totalAmount));
@@ -254,7 +255,7 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .post(`/api/v1/tour-bookings/${tourBooking.id}/invoices`)
       .set('Authorization', `Bearer ${token}`)
       .expect(201);
-    const invoice = invoiceRes.body as InvoiceDto;
+    const invoice: InvoiceDto = invoiceRes.body as InvoiceDto;
 
     await http
       .get(`/api/v1/invoices/${invoice.id}/pdf`)
@@ -304,7 +305,7 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .post(`/api/v1/tour-bookings/${tourBooking.id}/invoices`)
       .set('Authorization', `Bearer ${coordinatorToken}`)
       .expect(201);
-    const invoice = invoiceRes.body as InvoiceDto;
+    const invoice: InvoiceDto = invoiceRes.body as InvoiceDto;
 
     const paymentRes = await http
       .post(`/api/v1/tour-bookings/${tourBooking.id}/payments`)
@@ -317,7 +318,8 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .get(`/api/v1/tour-bookings/${tourBooking.id}/invoice`)
       .set('Authorization', `Bearer ${coordinatorToken}`)
       .expect(200);
-    expect((latest.body as InvoiceDto).id).toBe(invoice.id);
-    expect((latest.body as InvoiceDto).paymentStatus).toBe('PAID');
+    const latestInvoice: InvoiceDto = latest.body as InvoiceDto;
+    expect(latestInvoice.id).toBe(invoice.id);
+    expect(latestInvoice.paymentStatus).toBe('PAID');
   });
 });

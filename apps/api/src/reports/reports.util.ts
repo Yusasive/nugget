@@ -151,7 +151,7 @@ export function toCsv<T extends object>(
   rows: T[],
 ): string {
   const escape = (value: unknown): string => {
-    const str = value === null || value === undefined ? '' : String(value as string | number | boolean);
+    const str = value === null || value === undefined ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value as string | number | boolean);
     return /[",\n]/.test(str) ? `"${str.replace(/"/g, '""')}"` : str;
   };
   const header = columns.map((c) => escape(c.label)).join(',');
