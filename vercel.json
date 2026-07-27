@@ -2,5 +2,8 @@
   "installCommand": "pnpm install --filter @nugget/web...",
   "buildCommand": "pnpm --filter @nugget/web... build",
   "outputDirectory": "apps/web/dist",
-  "framework": null
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
