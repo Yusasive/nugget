@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DATABASE_URL: postgresql://nugget:nugget@localhost:5432/nugget_test
+  REDIS_URL: redis://localhost:6379
+  CORS_ORIGIN: http://localhost:5173
+  JWT_ACCESS_SECRET: ci-only-secret-do-not-use-elsewhere-0123456789abcdef
+  JWT_ACCESS_TTL: 15m
+  JWT_REFRESH_TTL_DAYS: 7
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: nugget
+          POSTGRES_PASSWORD: nugget
+          POSTGRES_DB: nugget_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nugget"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+      redis:
+        image: valkey/valkey:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "valkey-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Apply database migrations
+        run: pnpm --filter @nugget/api prisma:migrate:deploy
+
+      - name: Seed roles and bootstrap Super Admin
+        run: pnpm --filter @nugget/api prisma:seed
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: API e2e tests (auth/RBAC/branch-scoping + booking concurrency against real Postgres/Redis)
+        run: pnpm --filter @nugget/api test:e2e
