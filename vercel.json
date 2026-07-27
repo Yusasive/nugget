@@ -1,0 +1,5 @@
+{
+  "installCommand": "pnpm install --filter @nugget/web...",
+  "buildCommand": "pnpm --filter @nugget/web build",
+  "outputDirectory": "apps/web/dist"
+}
