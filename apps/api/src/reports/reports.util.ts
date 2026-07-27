@@ -156,6 +156,7 @@ export function toCsv<T extends object>(
   };
   const header = columns.map((c) => escape(c.label)).join(',');
   const lines = rows.map((row) =>
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     columns.map((c) => escape(row[c.key])).join(','),
   );
   return [header, ...lines].join('\n');
