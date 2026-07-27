@@ -5,9 +5,7 @@ import { ThrottlerStorage } from '@nestjs/throttler';
 import type {
   BookingDto,
   FolioDto,
-  InvoiceDto,
   LoginResponse,
-  OccupancyReportDto,
   ProfitAndLossDto,
   RestaurantOrderDto,
   RoleDto,
@@ -89,7 +87,7 @@ describe('UAT — Simulated Day (e2e)', () => {
       imports: [AppModule],
     })
       .overrideProvider(ThrottlerStorage)
-      .useValue({ increment: async () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
+      .useValue({ increment: () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
       .compile();
 
     app = moduleFixture.createNestApplication();

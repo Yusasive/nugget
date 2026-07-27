@@ -6,7 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import type {
-  InvoiceDto,
   PaginatedResponse,
   RestaurantOrderDto,
 } from '@nugget/shared-types';

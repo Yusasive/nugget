@@ -196,6 +196,6 @@ describe('Tour booking seat concurrency (e2e)', () => {
       .get(`/api/v1/tour-departures/${departureId}`)
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
-    expect(departureRes.body.availableSeats).toBe(1);
+    expect((departureRes.body as { availableSeats: number }).availableSeats).toBe(1);
   });
 });

@@ -38,7 +38,7 @@ import { CancelTourBookingDto } from './dto/cancel-tour-booking.dto';
 import { CreatePublicTourBookingDto } from './dto/create-public-tour-booking.dto';
 import { CreateTourBookingDto } from './dto/create-tour-booking.dto';
 import { ListTourBookingsQueryDto } from './dto/list-tour-bookings-query.dto';
-import { activeTourBookingStatusWhere, resolveGuestId } from './tour.util';
+import { resolveGuestId } from './tour.util';
 
 interface CreateCoreParams {
   /** Non-Super-Admin staff and every public request must match this; Super

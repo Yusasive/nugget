@@ -35,7 +35,7 @@ describe('RBAC & branch scoping (e2e)', () => {
       imports: [AppModule],
     })
       .overrideProvider(ThrottlerStorage)
-      .useValue({ increment: async () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
+      .useValue({ increment: () => ({ totalHits: 1, timeToExpire: 0, isBlocked: false, timeToBlockExpire: 0 }) })
       .compile();
 
     app = moduleFixture.createNestApplication();

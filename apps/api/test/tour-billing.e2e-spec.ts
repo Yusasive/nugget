@@ -4,7 +4,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import type {
   BookingDto,
   FolioDto,
-  InvoiceDto,
   LoginResponse,
   TourBookingDto,
 } from '@nugget/shared-types';
@@ -234,7 +233,7 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .set('Authorization', `Bearer ${token}`)
       .send({ method: 'CASH', amount: tourBooking.totalAmount })
       .expect(201);
-    expect(paymentRes.body.payment.status).toBe('SUCCESSFUL');
+    expect((paymentRes.body as { payment: { status: string } }).payment.status).toBe('SUCCESSFUL');
   });
 
   it('rejects issuing a standalone invoice for a bundled tour booking', async () => {
@@ -312,7 +311,7 @@ describe('Tour billing: bundled folio charge vs. standalone invoice (e2e)', () =
       .set('Authorization', `Bearer ${coordinatorToken}`)
       .send({ method: 'CASH', amount: tourBooking.totalAmount })
       .expect(201);
-    expect(paymentRes.body.payment.status).toBe('SUCCESSFUL');
+    expect((paymentRes.body as { payment: { status: string } }).payment.status).toBe('SUCCESSFUL');
 
     const latest = await http
       .get(`/api/v1/tour-bookings/${tourBooking.id}/invoice`)
